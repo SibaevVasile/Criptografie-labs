@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#define NR_LITERE 31   /* alfabetul roman are 31 de litere */
-#define MAX 300        /* lungimea maxima a unui mesaj/cheie */
+#define NR_LITERE 31   
+#define MAX 300        
 
-/* Cele 31 de litere ale alfabetului romanesc (Tabelul 1) */
 const char *LITERE_MARI[NR_LITERE] = {
     "A","Ă","Â","B","C","D","E","F","G","H","I","Î","J","K","L","M",
     "N","O","P","Q","R","S","Ș","T","Ț","U","V","W","X","Y","Z"
@@ -14,27 +13,17 @@ const char *LITERE_MICI[NR_LITERE] = {
     "n","o","p","q","r","s","ș","t","ț","u","v","w","x","y","z"
 };
 
-/* O litera obisnuita (A-Z) ocupa 1 octet in UTF-8; o litera cu diacritice
- * (Ă Â Î Ș Ț) ocupa 2 octeti. Functia asta ne spune cati octeti sa citim. */
 int lungimeCaracter(unsigned char primulOctet) {
     if ((primulOctet & 0x80) == 0x00) return 1;
     return 2;
 }
 
-/* Cauta litera (text de 1-2 octeti) intr-un tabel si returneaza codul ei
- * (0-30, conform Tabelului 1), sau -1 daca nu apartine alfabetului */
 int cautaCod(const char *litera, const char *tabel[]) {
     for (int i = 0; i < NR_LITERE; i++)
         if (strcmp(litera, tabel[i]) == 0) return i;
     return -1;
 }
 
-/*
- * Transforma un text citit de la tastatura intr-un sir de coduri (0-30).
- * Elimina automat spatiile si orice caracter strain alfabetului, si nu
- * face diferenta intre majuscule si minuscule (ambele primesc acelasi cod).
- * Returneaza numarul de litere gasite.
- */
 int textLaCoduri(const char *text, int coduri[]) {
     int n = 0, i = 0;
     while (text[i] != '\0') {
@@ -51,15 +40,12 @@ int textLaCoduri(const char *text, int coduri[]) {
     return n;
 }
 
-/* Afiseaza un sir de coduri sub forma de text, cu litere mari */
 void afiseazaCoduri(int coduri[], int n) {
     for (int i = 0; i < n; i++)
         printf("%s", LITERE_MARI[coduri[i]]);
     printf("\n");
 }
 
-/* Deplaseaza fiecare cod cu "cheie" pozitii - Cifrul Cezar cu o cheie.
- * Pentru decriptare se apeleaza cu cheia negativa. */
 void deplaseaza(int coduri[], int n, int cheie) {
     for (int i = 0; i < n; i++) {
         int nou = (coduri[i] + cheie) % NR_LITERE;
@@ -68,10 +54,6 @@ void deplaseaza(int coduri[], int n, int cheie) {
     }
 }
 
-/* ---------- Cifrul Cezar cu 2 chei ---------- */
-
-/* Construieste alfabetul permutat: literele cheii 2 (fara repetitii),
- * urmate de restul literelor alfabetului, in ordine naturala. */
 void construiestePermutare(int coduriCheie2[], int lungCheie2, int permutare[]) {
     int folosit[NR_LITERE] = {0};
     int n = 0;
@@ -87,14 +69,12 @@ void construiestePermutare(int coduriCheie2[], int lungCheie2, int permutare[]) 
         if (!folosit[c]) permutare[n++] = c;
 }
 
-/* Cauta pozitia codului "c" in vectorul permutare */
 int pozitieIn(int c, int permutare[]) {
     for (int i = 0; i < NR_LITERE; i++)
         if (permutare[i] == c) return i;
     return -1;
 }
 
-/* Ca deplaseaza(), dar foloseste alfabetul permutat (cheia 2) */
 void deplaseazaCuPermutare(int coduri[], int n, int cheie, int permutare[]) {
     for (int i = 0; i < n; i++) {
         int pos = pozitieIn(coduri[i], permutare);
@@ -103,8 +83,6 @@ void deplaseazaCuPermutare(int coduri[], int n, int cheie, int permutare[]) {
         coduri[i] = permutare[nouaPos];
     }
 }
-
-/* ---------- Citire date de la utilizator ---------- */
 
 void citesteLinie(char *buf, int dim) {
     fgets(buf, dim, stdin);
@@ -118,9 +96,9 @@ int citesteCheie(void) {
         printf("Introduceti cheia (numar intreg intre 1 si %d): ", NR_LITERE - 1);
         if (scanf("%d", &cheie) == 1 && cheie >= 1 && cheie <= NR_LITERE - 1) break;
         printf("Valoare invalida. Incercati din nou.\n");
-        while (getchar() != '\n');   /* curata bufferul dupa o citire gresita */
+        while (getchar() != '\n');   
     }
-    while (getchar() != '\n');       /* consuma Enter-ul ramas */
+    while (getchar() != '\n');      
     return cheie;
 }
 
@@ -134,8 +112,6 @@ char citesteOperatie(void) {
         printf("Valoare invalida. Introduceti C sau D.\n");
     }
 }
-
-/* ---------- Cele 2 optiuni ale meniului ---------- */
 
 void optiuneOCheie(void) {
     char op = citesteOperatie();
@@ -185,8 +161,6 @@ void optiuneDouaChei(void) {
     printf("%s - rezultat: ", (op == 'C') ? "Criptare" : "Decriptare");
     afiseazaCoduri(coduri, n);
 }
-
-/* ---------- Programul principal ---------- */
 
 int main(void) {
     int optiune;

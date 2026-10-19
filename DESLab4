@@ -1,0 +1,106 @@
+using System;
+using System.Text;
+
+class Program
+{
+    static readonly int[] P = {
+        16, 7, 20, 21, 29, 12, 28, 17,
+        1, 15, 23, 26, 5, 18, 31, 10,
+        2, 8, 24, 14, 32, 27, 3, 9,
+        19, 13, 30, 6, 22, 11, 4, 25
+    };
+
+    static void Main()
+    {
+        Console.OutputEncoding = Encoding.UTF8;
+        Console.WriteLine("=== DES Sarcina 2.8: Calculul R_k ===");
+        Console.WriteLine("R_k = L_{k-1} XOR P(S_rez)");
+        Console.WriteLine();
+
+        string lkm1 = CitesteBitsauAleator("Introduceți L_{k-1} (32 biți) sau 'r' pentru aleatoriu: ");
+        string srez = CitesteBitsauAleator("Introduceți rezultatul cutiilor-S (32 biți) sau 'r' pentru aleatoriu: ");
+
+        Console.WriteLine();
+        Console.WriteLine("--- Pași intermediari ---");
+        Console.WriteLine("Tabela P: [" + string.Join(", ", P) + "]");
+        Console.WriteLine();
+
+        Console.WriteLine($"L_{{k-1}}  = {lkm1}");
+        Console.WriteLine($"S_rez    = {srez}");
+
+        string pRez = PermutareP(srez);
+        Console.WriteLine($"P(S_rez) = {pRez}");
+
+        string rk = XorBits(lkm1, pRez);
+        Console.WriteLine($"R_k      = L_{{k-1}} XOR P(S_rez) = {rk}");
+
+        Console.WriteLine();
+        Console.WriteLine($"R_k (binar) = {rk}");
+        Console.WriteLine($"R_k (hex)   = 0x{BinarToHex(rk)}");
+    }
+
+    static string CitesteBitsauAleator(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            string input = Console.ReadLine()?.Trim().ToLower();
+
+            if (input == "r")
+            {
+                Random rnd = new Random();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < 32; i++)
+                    sb.Append(rnd.Next(2));
+                return sb.ToString();
+            }
+
+            if (input != null && input.Length == 32 && EsteBinar(input))
+                return input;
+
+            Console.WriteLine("Eroare: introduceți exact 32 de caractere '0' sau '1', sau 'r' pentru aleatoriu.");
+        }
+    }
+
+    static bool EsteBinar(string s)
+    {
+        foreach (char c in s)
+            if (c != '0' && c != '1') return false;
+        return true;
+    }
+
+    static string PermutareP(string input)
+    {
+        char[] output = new char[32];
+        for (int i = 0; i < 32; i++)
+        {
+            // P[i] este index 1-based, deci scădem 1
+            output[i] = input[P[i] - 1];
+        }
+        return new string(output);
+    }
+
+    static string XorBits(string a, string b)
+    {
+        char[] result = new char[a.Length];
+        for (int i = 0; i < a.Length; i++)
+            result[i] = a[i] == b[i] ? '0' : '1';
+        return new string(result);
+    }
+
+    static string BinarToHex(string bin)
+    {
+        while (bin.Length % 4 != 0)
+            bin = "0" + bin;
+
+        StringBuilder hex = new StringBuilder();
+        for (int i = 0; i < bin.Length; i += 4)
+        {
+            int val = 0;
+            for (int j = 0; j < 4; j++)
+                val = (val << 1) + (bin[i + j] - '0');
+            hex.Append(val.ToString("X"));
+        }
+        return hex.ToString();
+    }
+}
